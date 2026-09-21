@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ffffff;
+  --fg: #0f172a;
+}
+.dark {
+  --bg: #0f172a;
+  --fg: #f1f5f9;
+}
+* {
+  font-family: Inter, system-ui, sans-serif;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
