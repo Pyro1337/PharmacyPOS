@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
@@ -138,6 +138,42 @@ def bulk_precio(data: BulkPriceUpdate, db: Session = Depends(get_db), current_us
     for m in meds:
         db.refresh(m)
     return [to_response(m) for m in meds]
+
+@router.post("/{med_id}/imagen", response_model=MedicamentoResponse)
+async def upload_imagen(med_id: int, file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    med = db.query(Medicamento).filter(Medicamento.id == med_id).first()
+    if not med:
+        raise HTTPException(status_code=404, detail="Medicamento no encontrado")
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Solo se permiten imágenes")
+    data = await file.read()
+    if len(data) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Imagen muy grande (máx 5MB)")
+    from ..services.minio_service import upload_image, delete_image_by_url
+    # delete old if exists
+    if med.imagen_url:
+        try:
+            delete_image_by_url(med.imagen_url)
+        except Exception:
+            pass
+    url = upload_image(data, file.content_type)
+    med.imagen_url = url
+    db.commit()
+    db.refresh(med)
+    return to_response(med)
+
+@router.delete("/{med_id}/imagen")
+def delete_imagen(med_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    med = db.query(Medicamento).filter(Medicamento.id == med_id).first()
+    if not med:
+        raise HTTPException(status_code=404, detail="Medicamento no encontrado")
+    if med.imagen_url:
+        from ..services.minio_service import delete_image_by_url
+        delete_image_by_url(med.imagen_url)
+        med.imagen_url = None
+        db.commit()
+        db.refresh(med)
+    return to_response(med)
 
 @router.get("/{med_id}/historial")
 def historial(med_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

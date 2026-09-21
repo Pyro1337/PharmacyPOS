@@ -9,6 +9,7 @@ export interface CartItem {
   descuento_item: number
   stock_actual: number
   requiere_receta: boolean
+  imagen_url?: string | null
 }
 
 interface CartState {

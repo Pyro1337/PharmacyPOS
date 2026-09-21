@@ -16,6 +16,7 @@ class MedicamentoCreate(BaseModel):
     fecha_vencimiento: Optional[date] = None
     categoria: Optional[str] = None
     proveedor_id: Optional[int] = None
+    imagen_url: Optional[str] = None
     activo: bool = True
 
 class MedicamentoUpdate(BaseModel):
@@ -31,6 +32,7 @@ class MedicamentoUpdate(BaseModel):
     fecha_vencimiento: Optional[date] = None
     categoria: Optional[str] = None
     proveedor_id: Optional[int] = None
+    imagen_url: Optional[str] = None
     activo: Optional[bool] = None
 
 class MedicamentoResponse(BaseModel):
@@ -49,6 +51,7 @@ class MedicamentoResponse(BaseModel):
     fecha_vencimiento: Optional[date]
     categoria: Optional[str]
     proveedor_id: Optional[int]
+    imagen_url: Optional[str] = None
     activo: bool
     creado_por: Optional[int]
     created_at: datetime

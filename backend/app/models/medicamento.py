@@ -20,6 +20,7 @@ class Medicamento(Base):
     fecha_vencimiento = Column(Date, nullable=True)
     categoria = Column(String, nullable=True, index=True)
     proveedor_id = Column(Integer, ForeignKey("proveedores.id", ondelete="SET NULL"), nullable=True)
+    imagen_url = Column(String, nullable=True)
     activo = Column(Boolean, default=True)
     creado_por = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

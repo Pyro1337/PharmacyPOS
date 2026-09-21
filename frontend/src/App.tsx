@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useAuthStore } from './stores/authStore'
+import './stores/themeStore'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import POS from './pages/POS'
@@ -20,22 +21,17 @@ function Protected({ children }: { children: React.ReactNode }) {
       fetchMe().finally(() => setLoading(false))
     } else setLoading(false)
   }, [])
-  if (loading) return <div className="p-8 text-center">Cargando...</div>
+  if (loading) return <div className="p-8 text-center text-slate-500 dark:text-slate-400">Cargando...</div>
   if (!isAuthenticated) return <Navigate to="/login" />
   return <>{children}</>
 }
 
 export default function App() {
-  const [dark, setDark] = useState(localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches))
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark)
-    localStorage.setItem('theme', dark ? 'dark' : 'light')
-  }, [dark])
   return (
-    <div className={dark ? 'dark bg-slate-900 text-slate-100 min-h-screen' : 'bg-slate-50 text-slate-900 min-h-screen'}>
+    <div className="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen transition-colors">
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Protected><Layout dark={dark} toggle={() => setDark(!dark)} /></Protected>}>
+        <Route path="/" element={<Protected><Layout /></Protected>}>
           <Route index element={<Dashboard />} />
           <Route path="pos" element={<POS />} />
           <Route path="medicamentos" element={<Medicamentos />} />

@@ -34,6 +34,20 @@ async def add_security_headers(request, call_next):
 # Create tables (skip if DB not available - e.g., during tests without postgres)
 try:
     Base.metadata.create_all(bind=engine)
+    # Migration: ensure imagen_url column exists (for existing DBs)
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE medicamentos ADD COLUMN IF NOT EXISTS imagen_url VARCHAR"))
+            conn.commit()
+        except Exception as e:
+            print(f"Migration imagen_url: {e}")
+        # Ensure minio buckets
+        try:
+            from .services.minio_service import ensure_bucket
+            ensure_bucket()
+        except Exception as e:
+            print(f"MinIO ensure bucket at startup: {e}")
 except Exception as e:
     print(f"Warning: could not create tables at import: {e}")
 
